@@ -13,7 +13,7 @@ EInteractionState = {
   EInteractionState_MAX = 4
 }
 
-require("Mods.RelocateMod.Options")
+dofile("ue4ss/Mods/RelocateMod/options.lua")
 
 Mod.Relocate.IsEnabled = false
 

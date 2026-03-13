@@ -4,8 +4,8 @@ Mod.Relocate = {}
 Mod.Name = "RelocateMod"
 print(Mod.Name .. " init\n")
 
----@enum EInteractionState
-EInteractionState = {
+---@type EInteractionState
+local EInteractionState = {
   Hidden = 0,
   Disabled = 1,
   Enabled = 2,

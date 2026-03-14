@@ -20,6 +20,8 @@
 Mod.Relocate.Key = Key.NUM_ONE
 Mod.Relocate.ModifierKey = ModifierKey.ALT
 
+-- COMMAND: spawn
+--
 -- Change the value below to rename the main console command (e.g., "create" instead of "spawn").
 Mod.SpawnActorCommandName = "spawn"
 
@@ -59,3 +61,20 @@ Mod.Types = {
         aliases = { "ResourceSurveyor", "RS" }
     }
 }
+
+-- COMMAND: canrecycle
+--
+-- Enables the "RECYCLE" shortcut prompt for all buildings.
+-- This shortcut appears on the screen when hovering over a building.
+-- Note: This change is not persistent. To revert the effect, simply
+-- restart the game or reload your save.
+--
+-- Warning: Recycled buildings are permanently destroyed and cannot be
+-- recovered.
+--
+-- Change the value below to rename the canrecycle console command
+-- (e.g., "demolish" or "recycle" instead of "canrecycle").
+--
+-- USAGE EXAMPLE (Type these in the game console; press F10 in-game (twice)):
+--   canrecycle
+Mod.CanRecycleCommandName = "canrecycle"

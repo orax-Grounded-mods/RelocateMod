@@ -11,6 +11,7 @@ print(Mod.Name .. " init\n")
 
 local UEHelpers = require("UEHelpers")
 local lower = string.lower
+local format = string.format
 
 ---@type EInteractionState
 local EInteractionState = {
@@ -19,6 +20,14 @@ local EInteractionState = {
   Enabled = 2,
   Indeterminate = 3,
   EInteractionState_MAX = 4
+}
+
+---@type EPlaceableCondition
+local EPlaceableCondition = {
+  Never = 0,
+  InEditMode = 1,
+  Always = 2,
+  EPlaceableCondition_MAX = 3,
 }
 
 ---Check if a string exists in a table by converting all values to lower-case.
@@ -114,9 +123,9 @@ end
 
 ---Generate a help message displaying command syntax and all available actor aliases.
 ---@return string helpMessage The formatted string containing usage instructions and object list.
-local function generateHelpMessage()
+local function generateHelpMessageForSpawnCmd()
   -- Define the command syntax and the case-insensitivity rule.
-  local syntax = string.format("Usage: %s <alias>", Mod.SpawnActorCommandName)
+  local syntax = format("Usage: %s <alias>", Mod.SpawnActorCommandName)
   local example = "Example: spawn ASL"
   local caseNote = "Note: Aliases are case-insensitive (e.g., ASL = asl)."
 
@@ -130,7 +139,7 @@ local function generateHelpMessage()
   -- Iterate through the configuration to list each object.
   for typeName, typeInfo in pairs(Mod.Types) do
     -- Format: - Name : Description (Aliases: a, b, c).
-    local line = string.format("- %s : %s (Aliases: %s)",
+    local line = format("- %s : %s (Aliases: %s)",
       typeName,
       typeInfo.description or "No description",
       table.concat(typeInfo.aliases, ", "))
@@ -161,6 +170,31 @@ local function ToogleRelocate()
   Mod.Relocate.IsEnabled = not Mod.Relocate.IsEnabled
 end
 
+-- Enables the "RECYCLE" shortcut prompt for all buildings.
+-- This shortcut appears on the screen when hovering over a building.
+---@param outputDevice FOutputDevice
+local function enableCanDemolishOnAllBuildings(outputDevice)
+  local buildings = FindAllOf("Building") ---@type ABuilding[]?
+
+  if buildings then
+    outputDevice:Log(format("Enable 'CanDemolish' on %d buildings...\n" ..
+      "You should now be able to recycle all existing buildings, " ..
+      "though it may not work on certain specific structures.\n" ..
+      "Warning: Recycled buildings are permanently destroyed and cannot be recovered.",
+      #buildings))
+
+    local always = EPlaceableCondition.Always
+
+    ExecuteInGameThread(function()
+      for _, building in pairs(buildings) do
+        if building:IsValid() then
+          building.CanDemolish = always
+        end
+      end
+    end)
+  end
+end
+
 if Mod.Relocate.Key ~= nil then
   if Mod.Relocate.ModifierKey ~= nil then
     RegisterKeyBind(Mod.Relocate.Key, { Mod.Relocate.ModifierKey }, ToogleRelocate)
@@ -176,7 +210,7 @@ RegisterConsoleCommandHandler(Mod.SpawnActorCommandName,
   ---@return boolean
   function(fullCommand, args, outputDevice)
     if #args == 0 then
-      local msg = generateHelpMessage()
+      local msg = generateHelpMessageForSpawnCmd()
       outputDevice:Log(msg)
       return true
     end
@@ -198,6 +232,17 @@ RegisterConsoleCommandHandler(Mod.SpawnActorCommandName,
       error(msg)
       return
     end
+
+    return true
+  end)
+
+RegisterConsoleCommandHandler(Mod.CanRecycleCommandName,
+  ---@param fullCommand string
+  ---@param args table
+  ---@param outputDevice FOutputDevice
+  ---@return boolean
+  function(fullCommand, args, outputDevice)
+    enableCanDemolishOnAllBuildings(outputDevice)
 
     return true
   end)
